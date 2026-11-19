@@ -1,0 +1,9 @@
+
+# Always prefer my changes during a file-level merge
+README.md merge=ours
+src/mcpserver/errors/** merge=ours
+src/mcpserver/tools/** merge=ours
+src/mcpserver/models/** merge=ours
+src/mcpserver/lifespan/** merge=ours
+src/mcpserver/settings.py merge=ours
+

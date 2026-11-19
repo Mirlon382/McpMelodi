@@ -1,0 +1,59 @@
+"""Startup and shutdown: build only what the enabled tool families need.
+
+Each source contributes its own context fragment and closes its own clients. The exit stack
+unwinds them in reverse, so a family that was never built is never torn down.
+
+This is the composition root: it is the one place that reads the whole `Settings`, so nothing
+below it has to.
+"""
+
+from collections.abc import AsyncIterator
+from contextlib import AsyncExitStack
+from typing import Any
+
+from fastmcp import FastMCP
+from fastmcp.server.lifespan import Lifespan, lifespan
+
+from ..settings import Settings
+from .elasticsearch import elasticsearch_lifespan
+from .melodi import melodi_lifespan
+
+
+def build_lifespan(settings: Settings) -> Lifespan:
+    """Return the lifespan FastMCP runs, wired for the families that are enabled."""
+
+    @lifespan
+    async def app_lifespan(_server: FastMCP[Any]) -> AsyncIterator[dict[str, Any]]:
+        # insee.fr and Melodi search the same index, so they share one client. The settings
+        # validator guarantees a host whenever either is enabled, which is what makes `es_host`
+        # non-None here and lets the client take a plain `str`.
+        es_host = settings.es_host
+
+        async with AsyncExitStack() as stack:
+            context: dict[str, Any] = {}
+
+            if es_host is not None:
+                elasticsearch_client = await stack.enter_async_context(
+                    elasticsearch_lifespan(
+                        host=es_host,
+                        tls_verify=settings.es_tls_verify,
+                        request_timeout_seconds=settings.es_request_timeout_seconds,
+                        max_retries=settings.es_max_retries,
+                    )
+                )
+                context |= await stack.enter_async_context(
+                    melodi_lifespan(
+                        elasticsearch_client=elasticsearch_client,
+                        data_base_url=settings.melodi_data_base_url,
+                        request_timeout_seconds=settings.melodi_request_timeout_seconds,
+                        connect_timeout_seconds=settings.melodi_connect_timeout_seconds,
+                        datasets_index=settings.es_index_melodi_datasets,
+                        columns_index=settings.es_index_melodi_columns,
+                        column_search_size=settings.melodi_column_search_size,
+                    )
+                )
+
+
+            yield context
+
+    return app_lifespan
