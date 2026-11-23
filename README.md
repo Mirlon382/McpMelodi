@@ -2,6 +2,9 @@
 
 Python MCP server based on the FastMCP v4 lib to connect LLM to the REST API endpoint of Melodi, the INSEE open data store.
 
+## Warning
+It will not work out of the box. You need to build indexes by extracting and parsing data from Melodi *COMING SOON*
+
 ## Run locally
 
 Simply retrieve the repository. UV handles the rest.
