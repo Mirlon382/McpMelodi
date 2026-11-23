@@ -1,9 +1,29 @@
 # MCP Melodi
 
-Source code of the MCP server interfacing the Melodi API
+Python MCP server based on the FastMCP v4 lib to connect LLM to the REST API endpoint of Melodi, the INSEE open data store.
+
+## Run locally
+
+Simply retrieve the repository. UV handles the rest.
 
 ```{bash}
+git clone <url>
+uv sync
 uv run mcpserver
 ```
 
-Based on the McpSquelette project
+To inspect and test the server without using an LLM
+
+```{bash}
+npx @modelcontextprotocol/inspector
+```
+
+## Make it portable
+
+To deploy the server 
+
+```{bash}
+docker build . -t myserver
+```
+
+There is also some Kubernetes config available in `k8s/`
