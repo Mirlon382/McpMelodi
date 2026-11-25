@@ -2,8 +2,8 @@
 
 from fastmcp.dependencies import Depends
 
-from ...lifespan.melodi import get_melodi_index_service
 from ...errors import AppToolError, ErrorCode
+from ...lifespan.melodi import get_melodi_index_service
 from ...models.melodi import (
     DEFAULT_DATASETS,
     DatasetQuery,
@@ -13,6 +13,7 @@ from ...models.melodi import (
     StartYear,
 )
 from ...services.melodi.index_service import MelodiIndexService
+
 
 async def search_melodi_datasets(
     query: DatasetQuery,
@@ -38,9 +39,8 @@ async def search_melodi_datasets(
       and you need to locate the right dataset before fetching rows.
 
     WHEN NOT TO USE
-    - Generic, up-to-date indicator questions (use `get_insee_homepage`).
-    - Full-text analysis of a published report (use `search_insee_documents`).
-    - Definition/ontology lookups (use `run_rmes_sparql`).
+    - You already have the `dataset_id`: go straight to `search_melodi_modalities`.
+    - You want the rows themselves, not the catalogue entry. Use `get_melodi_observations`.
     """
     # Not a schema constraint: a JSON schema cannot compare two parameters. Reversed bounds still
     # match datasets covering both years, so this is about telling the caller rather than safety.

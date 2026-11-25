@@ -43,6 +43,7 @@ def keep_requested_years(
     requested_years = {str(year) for year in years}
     return [observation for observation in observations if read_observation_year(observation) in requested_years]
 
+
 async def get_melodi_observations(
     dataset_id: DatasetId,
     years: Years,
@@ -63,7 +64,7 @@ async def get_melodi_observations(
 
     WHEN NOT TO USE
     - You are still looking for the right dataset. Use `search_melodi_datasets` first.
-    - You need concept definitions or code-list vocabularies. Use `run_rmes_sparql`.
+    - You need the exact code of a filter value. Use `search_melodi_modalities` first.
     """
     # Business rule: fetching everything and filtering years here is deliberate. The API's own
     #   filter matches only periods starting on that date, so `TIME_PERIOD=2025` returns the

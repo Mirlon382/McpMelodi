@@ -27,12 +27,22 @@ NO_CONTROL_CHARS_PATTERN = r"^[^\x00-\x08\x0b\x0c\x0e-\x1f\x7f]*$"
 # Free text sent to a search engine. Surrounding whitespace is dropped first, so "   " counts as empty.
 SearchText = Annotated[
     str,
-    StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_SEARCH_TEXT_CHARS,pattern=NO_CONTROL_CHARS_PATTERN),
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=MAX_SEARCH_TEXT_CHARS,
+        pattern=NO_CONTROL_CHARS_PATTERN,
+    ),
 ]
 
 Year = Annotated[int, Field(ge=MIN_YEAR, le=MAX_YEAR)]
 
 ShortText = Annotated[
     str,
-    StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_SHORT_TEXT_CHARS,pattern=NO_CONTROL_CHARS_PATTERN),
+    StringConstraints(
+        strip_whitespace=True,
+        min_length=1,
+        max_length=MAX_SHORT_TEXT_CHARS,
+        pattern=NO_CONTROL_CHARS_PATTERN,
+    ),
 ]

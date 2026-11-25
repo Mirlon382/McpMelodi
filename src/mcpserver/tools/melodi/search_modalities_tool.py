@@ -13,6 +13,7 @@ from ...models.melodi import (
 )
 from ...services.melodi.index_service import MelodiIndexService
 
+
 async def search_melodi_modalities(
     dataset_id: DatasetId,
     column_ids: ColumnIds,

@@ -5,9 +5,7 @@ from typing import Annotated, Any
 from pydantic import BaseModel, Field
 
 from ..settings import load_tool_limits
-
 from .common import MAX_SEARCH_TEXT_CHARS, MAX_YEAR, MIN_YEAR, SearchText, Year
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Schema bounds --------------------------------------------------------------------------------------------------------
@@ -44,14 +42,15 @@ CODE_PATTERN = r"^[A-Za-z0-9_-]+$"
 # --- shared by every Melodi tool ---
 
 
-
 ColumnId = Annotated[str, Field(min_length=1, max_length=MAX_CODE_CHARS, pattern=CODE_PATTERN)]
 ModalityCode = Annotated[str, Field(min_length=1, max_length=MAX_MODALITY_CHARS)]
 
 DatasetId = Annotated[
     str,
     Field(
-        description=(f"Identifier of the Melodi dataset (from search_melodi_datasets), at most {MAX_CODE_CHARS} characters."),
+        description=(
+            f"Identifier of the Melodi dataset (from search_melodi_datasets), at most {MAX_CODE_CHARS} characters."
+        ),
         min_length=1,
         max_length=MAX_CODE_CHARS,
         pattern=CODE_PATTERN,
@@ -101,9 +100,10 @@ ColumnFilters = Annotated[
 
 NumberOfObservations = Annotated[
     int,
-    Field(description=f"Maximum number of datasets to return, ordered by relevance, from 1 to {MAX_OBSERVATIONS}.",
-          ge=1, 
-          le=MAX_OBSERVATIONS,
+    Field(
+        description=f"Maximum number of observations to return, from 1 to {MAX_OBSERVATIONS}.",
+        ge=1,
+        le=MAX_OBSERVATIONS,
     ),
 ]
 
@@ -116,7 +116,7 @@ DatasetQuery = Annotated[
             "Explicit French description of the statistical dataset to search. "
             "Mention the phenomenon (inflation, births, unemployment), "
             "geographic level, population or product if known. "
-            f"Do NOT provide codes. At mpst {MAX_SEARCH_TEXT_CHARS} chars."
+            f"Do NOT provide codes. At most {MAX_SEARCH_TEXT_CHARS} chars."
         ),
         examples=[
             "indice des prix a la consommation",
@@ -135,12 +135,21 @@ StartYear = Annotated[
 
 EndYear = Annotated[
     Year,
-    Field(description=f"Dataset must contain data up to at least this year ({MIN_YEAR} to {MAX_YEAR}) and not earlier than start_year."),
+    Field(
+        description=(
+            f"Dataset must contain data up to at least this year ({MIN_YEAR} to {MAX_YEAR}), "
+            "and not earlier than start_year."
+        )
+    ),
 ]
 
 NumberOfDatasets = Annotated[
     int,
-    Field(description="Maximum number of datasets to return, ordered by relevance. From 1 to 20.", ge=1, le=20),
+    Field(
+        description=f"Maximum number of datasets to return, ordered by relevance, from 1 to {MAX_DATASETS}.",
+        ge=1,
+        le=MAX_DATASETS,
+    ),
 ]
 
 # --- search_melodi_modalities ---
@@ -174,9 +183,10 @@ ModalityQuery = Annotated[
 
 NumberOfModalities = Annotated[
     int,
-    Field(description=f"Maximum number of modalities to return per column, from 1 to {MAX_MODALITIES}.", 
-          ge=1, 
-          le=MAX_MODALITIES,
+    Field(
+        description=f"Maximum number of modalities to return per column, from 1 to {MAX_MODALITIES}.",
+        ge=1,
+        le=MAX_MODALITIES,
     ),
 ]
 
