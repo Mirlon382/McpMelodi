@@ -10,6 +10,7 @@ from elasticsearch.dsl.query import Query
 from elasticsearch.dsl.response import Hit
 from elasticsearch.dsl.utils import AttrList
 
+from ...errors import AppToolError, ErrorCode
 from ...errors.elasticsearch_tool_error_handler import elasticsearch_tool_error_handler
 from ...models.melodi import (
     ColumnResult,
@@ -164,7 +165,7 @@ class MelodiIndexService:
 
     def __init__(
         self,
-        elasticsearch_client: AsyncElasticsearch,
+        elasticsearch_client: AsyncElasticsearch | None,
         datasets_index: str,
         columns_index: str,
         column_search_size: int,
@@ -173,6 +174,23 @@ class MelodiIndexService:
         self._datasets_index = datasets_index
         self._columns_index = columns_index
         self._column_search_size = column_search_size
+
+    def _client(self) -> AsyncElasticsearch:
+        """The client, or a caller-readable reason there is none.
+
+        A deployment without ES_HOST is supported (the observations tool never needs it), so the
+        absence is reported here rather than as an AttributeError three frames down.
+        """
+        if self._elasticsearch_client is None:
+            raise AppToolError(
+                ErrorCode.BACKEND_UNAVAILABLE,
+                "This server has no Elasticsearch configured (ES_HOST is unset), so the dataset and "
+                "modality indices cannot be searched. The observations tool does not need them, but "
+                "its dataset_id has to come from somewhere else -- the Melodi catalogue at "
+                "https://catalogue-donnees.insee.fr lists the identifiers. An operator can enable "
+                "these two tools by setting ES_HOST and building the indices.",
+            )
+        return self._elasticsearch_client
 
     async def search_datasets(
         self,
@@ -189,7 +207,7 @@ class MelodiIndexService:
                 end_year=end_year,
                 number_of_datasets=number_of_datasets,
             )
-            .using(self._elasticsearch_client)
+            .using(self._client())
             .index(self._datasets_index)
         )
         async with elasticsearch_tool_error_handler("Melodi datasets"):
@@ -223,7 +241,7 @@ class MelodiIndexService:
                 number_of_modalities=number_of_modalities,
                 column_search_size=self._column_search_size,
             )
-            .using(self._elasticsearch_client)
+            .using(self._client())
             .index(self._columns_index)
         )
         async with elasticsearch_tool_error_handler("Melodi columns"):

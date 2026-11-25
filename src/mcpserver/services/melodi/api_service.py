@@ -24,7 +24,7 @@ class MelodiApiService:
         # that cannot leave this path segment. Quoting it as well means a `/`, `?` or `#` stays inside the
         # segment if that pattern is ever widened (`.` is not quoted, so the pattern must keep refusing it).
         url = f"/{quote(dataset_id, safe='')}"
-        
+
         try:
             response = await self._http_client.get(
                 url,

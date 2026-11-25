@@ -1,7 +1,6 @@
 """Entrypoint: builds the settings, the clients and the MCP application, then serves it over HTTP."""
 
 import logging
-from textwrap import dedent
 
 import uvicorn
 from fastmcp import FastMCP
@@ -10,6 +9,7 @@ from fastmcp.server.middleware.logging import LoggingMiddleware
 from fastmcp.server.middleware.rate_limiting import SlidingWindowRateLimitingMiddleware
 from fastmcp.server.middleware.timing import TimingMiddleware
 
+from . import package_version
 from .lifespan import build_lifespan
 from .logging import build_logging_config, configure_logging
 from .settings import load_settings
@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 mcp = FastMCP(
     settings.server_name,
+    # Without this FastMCP announces its own library version as the server's.
+    version=package_version(),
     instructions=settings.instructions,
     # Only AppToolError messages reach the caller; anything else is a bug and is replaced
     # by a generic message.
@@ -72,6 +74,7 @@ app = mcp.http_app(
     allowed_hosts=settings.allowed_hosts,
     allowed_origins=settings.allowed_origins,
 )
+
 
 def main() -> None:
     uvicorn.run(
