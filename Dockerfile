@@ -16,7 +16,9 @@ WORKDIR /app
 COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /uvx /bin/
 
 # Dependencies before source: a one-line code edit must not invalidate the layer that installs them.
-COPY pyproject.toml uv.lock /app/
+# README.md and LICENSE ride along because the project metadata points at both (`readme` and
+# `license-files`) and the metadata is validated even under --no-install-project.
+COPY pyproject.toml uv.lock README.md LICENSE /app/
 
 # The cache mount survives between builds without being stored in the image.
 # --locked fails when uv.lock is not current for pyproject.toml. Plain `uv sync` would rewrite the
@@ -32,8 +34,14 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ---- Runtime stage --------------------------------------------------------------------------------
 FROM python:3.12-slim
 
-# CI passes the real version; `dev` is honest for a local build.
+# CI passes the real version; `dev` is honest for a local build. Both the label and the MCP
+# handshake read it, so a client can tell which build it is talking to.
 ARG APP_VERSION=dev
+
+LABEL org.opencontainers.image.title="mcpmelodi" \
+      org.opencontainers.image.version="${APP_VERSION}" \
+      org.opencontainers.image.source="https://github.com/Mirlon382/McpMelodi" \
+      org.opencontainers.image.licenses="etalab-2.0"
 
 
 # PATH: `python` means the venv's python everywhere -- CMD, HEALTHCHECK, and docker exec.
