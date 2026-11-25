@@ -1,7 +1,18 @@
 [project]
-name = "mcpserver"
+name = "mcpmelodi"
 version = "0.1.0"
-description = "MCP server (edit this)"
+description = "MCP server exposing INSEE's Melodi open-data store — dataset catalogue, modalities and observations — to LLM clients"
+readme = "README.md"
+license = "etalab-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Mirlon382" }]
+keywords = ["mcp", "model-context-protocol", "insee", "melodi", "open-data", "statistics", "elasticsearch"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
 requires-python = ">=3.12"
 dependencies = [
     "fastmcp>=4.0.0",
@@ -10,11 +21,18 @@ dependencies = [
     "httpx==0.28.1",
     "python-dotenv==1.2.3",
     "pydantic-settings>=2.0.0",
-    "elasticsearch>=9.5.1",
+    # The `async` extra is what brings aiohttp: AsyncElasticsearch builds its transport with
+    # AiohttpHttpNode, and without aiohttp the server refuses to start the moment ES_HOST is set.
+    "elasticsearch[async]>=9.5.1",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Mirlon382/McpMelodi"
+Repository = "https://github.com/Mirlon382/McpMelodi"
+Issues = "https://github.com/Mirlon382/McpMelodi/issues"
+
 [project.scripts]
-mcpserver="mcpserver.server:main"
+mcpserver = "mcpserver.server:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -27,7 +45,6 @@ packages = ["src/mcpserver"]
 dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
-    "pre-commit>=4.5.1",
     "ruff>=0.15.4",
 ]
 
@@ -63,4 +80,6 @@ docstring-code-format = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-
+# Pin the fixture loop scope: leaving it unset makes pytest-asyncio warn on every run and changes the
+# default in a future release, which would silently move the loop the async tests share.
+asyncio_default_fixture_loop_scope = "function"
